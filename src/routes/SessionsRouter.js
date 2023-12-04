@@ -21,6 +21,42 @@ class SessionsRouter extends BaseRouter {
     this.get("/logout", ["AUTH"], sessionsController.logout);
 
     this.get("/current", ["AUTH"], sessionsController.current);
+
+    this.get(
+      "/github",
+      ["NO_AUTH"],
+      passportCall("github", { strategyType: "GITHUB" }),
+      async (req, res) => {}
+    );
+
+    this.get(
+      "/githubcallback",
+      ["NO_AUTH"],
+      passportCall("github", {
+        scope: ["profile", "email"],
+        strategyType: "GITHUB",
+      }),
+      sessionsController.githubcallback
+    );
+    this.get(
+      "/google",
+      ["NO_AUTH"],
+      passportCall("google", {
+        scope: ["profile", "email"],
+        strategyType: "OAUTH",
+      }),
+      async (req, res) => {}
+    );
+
+    this.get(
+      "/googlecallback",
+      ["NO_AUTH"],
+      passportCall("google", {
+        scope: ["profile", "email"],
+        strategyType: "OAUTH",
+      }),
+      sessionsController.googlecallback
+    );
   }
 }
 

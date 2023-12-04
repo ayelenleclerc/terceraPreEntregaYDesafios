@@ -1,6 +1,8 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as JWTStrategy, ExtractJwt } from "passport-jwt";
+import GitHubStrategy from "passport-github2";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 
 import { usersService, cartsService } from "../services/index.js";
 import authService from "../services/authService.js";
@@ -13,8 +15,8 @@ const initializePassportStrategies = () => {
       { passReqToCallback: true, usernameField: "email", session: false },
       async (req, email, password, done) => {
         try {
-          const { firstName, lastName } = req.body;
-          if (!firstName || !lastName)
+          const { firstName, lastName, email, password } = req.body;
+          if (!firstName || !lastName || !email || !password)
             return done(null, false, { message: "Incomplete values" });
 
           const exists = await usersService.getUserBy({ email });
@@ -27,6 +29,7 @@ const initializePassportStrategies = () => {
             firstName,
             lastName,
             email,
+            role,
             password: hashedPassword,
           };
 
@@ -97,6 +100,85 @@ const initializePassportStrategies = () => {
       },
       async (payload, done) => {
         return done(null, payload);
+      }
+    )
+  );
+
+  passport.use(
+    "github",
+    new GitHubStrategy(
+      {
+        clientID: config.github.CLIENT_ID,
+        clientSecret: config.github.CLIENT_SECRET,
+        callbackURL: "http://localhost:8080/api/sessions/githubcallback",
+        // passReqToCallback: true,
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        const email = profile._json.email;
+
+        let user = await usersService.getUserBy({ email });
+        if (!user) {
+          const newUser = {
+            first_name: profile._json.name,
+            last_name: "",
+            age: "",
+            email,
+            password: "",
+            admin: false,
+          };
+          let cart;
+
+          if (req.cookies["cart"]) {
+            cart = req.cookies["cart"];
+          } else {
+            const cartResult = await cartsService.createCart();
+            cart = cartResult.id;
+          }
+
+          newUser.cart = cart;
+          const result = await usersService.createUser(newUser);
+          return done(null, result);
+        } else {
+          return done(null, user);
+        }
+      }
+    )
+  );
+  passport.use(
+    "google",
+    new GoogleStrategy(
+      {
+        clientID: config.google.CLIENT_ID,
+        clientSecret: config.google.CLIENT_SECRET,
+        callbackURL: "http://localhost:8080/api/sessions/googlecallback",
+        // passReqToCallback: true,
+      },
+      async (req, accessToken, refreshToken, profile, done) => {
+        const { _json } = profile;
+        const email = _json.email;
+
+        const user = await usersService.getUserBy({ email: _json.email });
+        if (user) {
+          return done(null, user);
+        } else {
+          const newUser = {
+            firstName: _json.given_name,
+            lastName: _json.family_name,
+            email: _json.email,
+          };
+          let cart;
+
+          if (req.cookies["cart"]) {
+            cart = req.cookies["cart"];
+          } else {
+            const cartResult = await cartsService.createCart();
+            cart = cartResult.id;
+          }
+
+          newUser.cart = cart;
+          const result = await usersService.createUser(newUser);
+          return done(null, result);
+        }
       }
     )
   );
