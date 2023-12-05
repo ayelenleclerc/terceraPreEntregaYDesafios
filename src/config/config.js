@@ -35,12 +35,12 @@ export default {
     CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   },
   mailer: {
-    USER: process.env.GMAIL_USER,
-    PASS: process.env.GMAIL_PASSWORD,
+    USER: process.env.NODE_MAILER_USER,
+    PASS: process.env.NODE_MAILER_PASSWORD,
   },
-  twilio: {
-    ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID,
-    AUTH_TOKEN: process.env.TWILIO_TOKEN,
-    FROM: process.env.TWILIO_TEST_NUMBER,
-  },
+  // twilio: {
+  //   ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID,
+  //   AUTH_TOKEN: process.env.TWILIO_TOKEN,
+  //   FROM: process.env.TWILIO_TEST_NUMBER,
+  // },
 };

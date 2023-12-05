@@ -29,7 +29,6 @@ const initializePassportStrategies = () => {
             firstName,
             lastName,
             email,
-            role,
             password: hashedPassword,
           };
 

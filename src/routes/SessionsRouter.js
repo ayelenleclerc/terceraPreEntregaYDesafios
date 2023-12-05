@@ -57,6 +57,17 @@ class SessionsRouter extends BaseRouter {
       }),
       sessionsController.googlecallback
     );
+
+    this.post(
+      "/passwordRestoreRequest",
+      ["PUBLIC"],
+      sessionsController.passwordRestoreRequest
+    );
+    this.put(
+      "/password-restore",
+      ["PUBLIC"],
+      sessionsController.passwordRestore
+    );
   }
 }
 
