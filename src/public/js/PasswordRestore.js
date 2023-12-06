@@ -16,4 +16,14 @@ form.addEventListener("submit", async (e) => {
       "Content-Type": "application/json",
     },
   });
+  const result = await response.json();
+  if (response.status === 200) {
+    Swal.fire({
+      icon: "success",
+      text: "Tu contraseña ha sido restablecida",
+      timer: 2000,
+    }).then(() => {
+      window.location.replace("/login");
+    });
+  }
 });

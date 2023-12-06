@@ -29,20 +29,6 @@ async function restorePassword() {
     },
   }).then(async (result) => {
     try {
-      if (result.isConfirmed) {
-        const email = result.value;
-        const response = await fetch("/api/sessions/passwordRestoreRequest", {
-          method: "POST",
-          body: JSON.stringify({ email }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        Swal.fire({
-          icon: "success",
-          text: "Si el email existe en nuestra base de datos, te hemos enviado un email para restablecer tu contraseña",
-        });
-      }
       if (result.value) {
         const email = result.value;
         const response = await fetch("/api/sessions/passwordRestoreRequest", {
@@ -54,7 +40,7 @@ async function restorePassword() {
         });
         Swal.fire({
           icon: "success",
-          text: "Si el email existe en nuestra base de datos, te hemos enviado un email para restablecer tu contraseña",
+          text: "Si el email existe en nuestra base de datos, se enviará un email para restablecer tu contraseña",
         });
       }
     } catch (error) {

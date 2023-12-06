@@ -4,6 +4,10 @@ import {
   ticketsService,
 } from "../services/index.js";
 
+import jwt from "jsonwebtoken";
+
+import config from "../config/config.js";
+
 import { getValidFilters } from "../utils.js";
 
 const home = async (req, res) => {

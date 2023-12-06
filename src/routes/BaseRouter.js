@@ -63,14 +63,17 @@ export default class BaseRouter {
     res.sendSuccessWithPayload = (payload) => {
       return res.send({ status: "success", payload });
     };
+    res.sendBadRequest = (error) => {
+      return res.status(400).send({ status: "error", error });
+    };
     res.sendInternalError = (error) => {
       return res.status(500).send({ status: "error", error });
     };
-    res.sendUnauthorized = (error) => {
-      return res.status(401).send({ status: "error", error });
-    };
     res.sendForbidden = (error) => {
       return res.status(403).send({ status: "error", error });
+    };
+    res.sendUnauthorized = (error) => {
+      return res.status(401).send({ status: "error", error });
     };
     next();
   }

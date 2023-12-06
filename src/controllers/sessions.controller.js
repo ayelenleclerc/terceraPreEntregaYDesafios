@@ -2,29 +2,22 @@ import jwt from "jsonwebtoken";
 import config from "../config/config.js";
 import UserDto from "../dto/userDto.js";
 import MailerService from "../services/MailerService.js";
+import DMailTemplates from "../constants//DMailTemplates.js";
+import { usersService } from "../services/index.js";
+import authService from "../services/authService.js";
 
 const register = async (req, res) => {
   try {
-    const mailInfo = {
-      from: "Distribuidora <ayelenleclerc@gmail.com>",
-      to: req.user.email,
-      subject: "Bienvenid@ a la Distribuidora",
-      html: `
-    <div>
-      <h1>Bienvenid@ a la Distribuidora</h1>
-      <h3>¡Hola, ${req.user.firstName}!</h3>
-      <p>Gracias por registrarte, desde ahora puedes comprar en la distribuidora, chatear con otros clientes y mucho más.</p>
-      <br>
-      <p>Saludos cordiales</p>
-      <p>Distribuidora</p>
- 
-      </div>
-    `,
-    };
     const mailerService = new MailerService();
-    const result = await mailerService.sendMail(mailInfo);
+    const result = await mailerService.sendMail(
+      [req.user.email],
+      DMailTemplates.WELCOME,
+      {
+        user: req.user,
+      }
+    );
   } catch (error) {
-    console.log(`Falló el envío de correo para ${req.user.email}`);
+    console.log(`Falló el envío de correo para ${req.user.email}`, error);
   }
   res.clearCookie("cart");
   return res.sendSuccess("Registered");
@@ -65,7 +58,18 @@ const githubcallback = async (req, res) => {
     });
 
     res.clearCookie("cart");
-
+    try {
+      const mailerService = new MailerService();
+      const result = await mailerService.sendMail(
+        [req.user.email],
+        DMailTemplates.WELCOME,
+        {
+          user: req.user,
+        }
+      );
+    } catch (error) {
+      console.log(`Falló el envío de correo para ${req.user.email}`, error);
+    }
     return res.redirect("/profile");
   } catch (error) {
     console.error("Error in GitHub callback:", error);
@@ -87,6 +91,18 @@ const googlecallback = async (req, res) => {
       maxAge: 86400000,
     });
     res.clearCookie("cart");
+    try {
+      const mailerService = new MailerService();
+      const result = await mailerService.sendMail(
+        [req.user.email],
+        DMailTemplates.WELCOME,
+        {
+          user: req.user,
+        }
+      );
+    } catch (error) {
+      console.log(`Falló el envío de correo para ${req.user.email}`, error);
+    }
     return res.redirect("/profile");
   } catch (error) {
     console.error("Error in Google callback:", error);
@@ -104,7 +120,7 @@ const passwordRestoreRequest = async (req, res) => {
   const mailerService = new MailerService();
   const result = await mailerService.sendMail(
     [email],
-    DMailTemplates.PWD_RESTORE,
+    DMailTemplates.RESTORE_PWD,
     { token }
   );
   res.sendSuccess("Email sent");
