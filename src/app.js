@@ -40,6 +40,11 @@ app.use("/api/carts", cartsRouter);
 app.use("/api/sessions", SessionsRouter);
 app.use("/api/chat", chatRouter);
 
+app.use((error, req, res, next) => {
+  console.log(error);
+  res.status(500).json({ error: error.message });
+});
+
 const httpServer = app.listen(PORT, () => {
   console.log(`Servidor escuchando en el puerto ${PORT}`);
 });

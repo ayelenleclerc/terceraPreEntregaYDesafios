@@ -15,7 +15,7 @@ export default class LoggerService {
 
   createLogger = (env) => {
     switch (env) {
-      case "desarrollo":
+      case "development":
         return winston.createLogger({
           levels: this.winston_levels,
           transports: [
@@ -27,7 +27,7 @@ export default class LoggerService {
           ],
         });
 
-      case "produccion":
+      case "production":
         return winston.createLogger({
           levels: this.winston_levels,
           transports: [
