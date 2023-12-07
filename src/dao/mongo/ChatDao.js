@@ -1,19 +1,11 @@
 import chatModel from "./models/chat.model.js";
 
 export default class ChatDao {
-  getMessages = async () => {
-    try {
-      return await chatModel.find().lean();
-    } catch (error) {
-      return error;
-    }
+  getMessages = (params) => {
+    return chatModel.find(params).lean();
   };
 
   createMessage = async (message) => {
-    try {
-      return await chatModel.create(message);
-    } catch (error) {
-      return error;
-    }
+    return chatModel.create(message);
   };
 }

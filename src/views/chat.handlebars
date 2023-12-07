@@ -1,29 +1,17 @@
-<h1>Bienvenidos a nuestro chat!</h1>
-<div id="chat-container">
-  <h4 id="nombreusuario">Username</h4>
-  <div id="chat-messages">
-    <div class="message sender">
-      <p id="chat"> </p>
-    </div>
-
+<h1 class="title">Bienvenid@ a nuestro chat!</h1>
+<div id="chatPanel">
+  <div class="titlePanel">
+    <h4 id="username"></h4>
+    <p id="loadingText"></p>
   </div>
-  <form id="formulario">
-    <input
-      type="text"
-      name="mensaje"
-      id="mensaje"
-      placeholder="Type your message..."
-    />
-    <input type="submit" value="Enviar" />
-  </form>
+
+  <div id="chatContent" class="chatContent"></div>
+  <div class="inputPanel">
+    <textarea name="chatBox" id="chatBox"></textarea>
+    <button id="sendButton">Enviar</button>
+  </div>
 
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script
-  type="text/javascript"
-  src="https://cdn.jsdelivr.net/npm/toastify-js"
-></script>
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="js/chat.js"></script>

@@ -1,55 +1,100 @@
 const socketClient = io();
-const nombreUsuario = document.getElementById("nombreusuario");
-const formulario = document.getElementById("formulario");
-const inputmensaje = document.getElementById("mensaje");
-const chat = document.getElementById("chat");
+const nombreUsuario = document.getElementById("username");
+const chatBox = document.getElementById("chatBox");
+const sendButton = document.getElementById("sendButton");
+const chatPanel = document.getElementById("chatContent");
+const loadingText = document.getElementById("loadingText");
 
-let usuario = null;
+loadingText.innerHTML = "Obteniendo mensajes...";
 
-if (!usuario) {
-  Swal.fire({
-    title: "Hola!, bienvenid@ a mi chat",
-    text: "Ingresa tu usuario",
-    input: "text",
-    inputValidator: (value) => {
-      if (!value) {
-        return "Necesitas ingresar tu Nombre";
-      }
-    },
-  }).then((username) => {
-    usuario = username.value;
-    nombreUsuario.innerHTML = usuario;
-    socketClient.emit("newUser", usuario);
-  });
+let user;
+const socket = io({
+  autoConnect: false,
+});
+
+fetchUser();
+
+chatBox.addEventListener("keyup", (event) => {
+  if (event.key === "Enter") {
+    if (chatBox.value.trim().length > 0) {
+      const messageBody = {
+        userId: user.id,
+        username: user.name,
+        body: chatBox.value.trim(),
+      };
+      socket.emit("chat:message", messageBody);
+      chatBox.value = "";
+    }
+  }
+});
+
+sendButton.addEventListener("click", (event) => {
+  if (chatBox.value.trim().length > 0) {
+    const messageBody = {
+      userId: user.id,
+      username: user.name,
+      role: user.role,
+      body: chatBox.value.trim(),
+    };
+    socket.emit("chat:message", messageBody);
+    chatBox.value = "";
+  }
+});
+
+//SOCKET EVENTS
+
+socket.on("chat:logMessage", (message) => {
+  const p = document.createElement("p");
+  p.innerHTML =
+    user.id === message.userId
+      ? message.body
+      : `${message.username} dice: ${message.body}`;
+  chatPanel.appendChild(p);
+});
+
+//FUNCTIONS
+async function fetchUser() {
+  const response = await fetch("/api/sessions/current");
+  if (response.status === 200) {
+    const result = await response.json();
+    user = result.payload;
+    console.log(user.payload);
+    await fetchMessages();
+    await socket.connect();
+    socketClient.emit("join", user);
+    loadingText.innerHTML = "";
+    nombreUsuario.innerHTML = `Hola ${user.name}`;
+  } else {
+    loadingText.innerHTML =
+      "Para poder participar en el chat, debes estar logueado";
+    chatBox.setAttribute("disabled", true);
+    sendButton.setAttribute("disabled", true);
+  }
 }
 
-formulario.onsubmit = (e) => {
-  e.preventDefault();
-  const info = {
-    user: usuario,
-    message: inputmensaje.value,
-  };
-  console.log(info);
-  socketClient.emit("message", info);
-  inputmensaje.value = " ";
-};
-
-socketClient.on("chat", (mensaje) => {
-  const chatrender = mensaje
-    .map((e) => {
-      return `<p><strong>${e.user}</strong>${e.message}`;
-    })
-    .join(" ");
-  chat.innerHTML = chatrender;
-});
-
-socketClient.on("broadcast", (usuario) => {
-  Toastify({
-    text: `Ingreso ${usuario} al chat`,
-    duration: 5000,
-    position: "right",
-    style: {
-      background: "linear-gradient(to right, #00b09b, #96c93d)",
-    },
-  }).showToast();
-});
+async function fetchMessages() {
+  const response = await fetch(`/api/chat`);
+  if (response.status === 200) {
+    const result = await response.json();
+    const messages = result.payload;
+    if (messages.length > 0) {
+      const fragment = document.createDocumentFragment();
+      for (const message of messages) {
+        const p = document.createElement("p");
+        p.innerHTML =
+          user.id === message.userId
+            ? message.body
+            : `${message.username} dice: ${message.body}`;
+        fragment.appendChild(p);
+      }
+      chatPanel.appendChild(fragment);
+      loadingText.remove();
+    } else {
+      loadingText.innerHTML =
+        "Aún no hay mensajes  ¡Sé el primero en participar";
+    }
+  } else {
+    loadingText.innerHTML =
+      "Error al obtener los mensajes previos, aún puedes participar";
+  }
+}

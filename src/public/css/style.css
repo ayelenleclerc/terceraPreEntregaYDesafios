@@ -5,6 +5,20 @@
   font-family: "Nunito", sans-serif;
 }
 
+.contenedorPrincipal {
+  display: flex;
+  width: 100%;
+  margin: 20px;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-content: center;
+  justify-content: space-around;
+  align-items: center;
+}
+.logo {
+  width: 100px;
+  height: 100px;
+}
 .navbar-nav {
   width: 100%;
 }
@@ -18,13 +32,13 @@
 }
 .title {
   font-family: "Borel", cursive;
-  font-size: 250%;
+  font-size: 1.5rem;
   text-align: center;
   margin: 20px;
 }
 .subtitle {
   font-family: "Borel", cursive;
-  font-size: 28px;
+  font-size: 1rem;
   text-align: center;
   margin: 5px;
 }
