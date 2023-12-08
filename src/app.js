@@ -3,6 +3,8 @@ import { Server } from "socket.io";
 import mongoose from "mongoose";
 import handlebars from "express-handlebars";
 import cookieParser from "cookie-parser";
+import swaggerJSDoc from "swagger-jsdoc";
+import swaggerUIExpress from "swagger-ui-express";
 
 import productsRouter from "./routes/ProductsRouter.js";
 import cartsRouter from "./routes/CartRouter.js";
@@ -22,6 +24,24 @@ const PORT = process.env.PORT || 8081;
 
 const connection = mongoose.connect(config.mongo.URL);
 console.log("Base de datos conectada");
+
+const swaggerSpecOptions = {
+  definition: {
+    openapi: "3.0.1",
+    info: {
+      title: "Distribuidora Bescos",
+      description: "Aplicación de Distribuidora Bescos, e-commerce",
+    },
+  },
+  apis: [`${__dirname}/docs/**/*.yml`],
+};
+
+const swaggerSpec = swaggerJSDoc(swaggerSpecOptions);
+app.use(
+  "/api-docs",
+  swaggerUIExpress.serve,
+  swaggerUIExpress.setup(swaggerSpec)
+);
 
 app.engine("handlebars", handlebars.engine());
 app.set("view engine", "handlebars");

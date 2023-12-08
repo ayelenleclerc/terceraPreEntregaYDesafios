@@ -33,10 +33,9 @@ const myErrorHandler = (error, next) => {
     customError.name = knownError;
     customError.message = error.message;
     customError.code = errorCodes[knownError];
-    customError.sendMail = true;
     next(customError);
   } else {
-    const customErrorInstance = new MyCustomError("../src/errors.json");
+    const customErrorInstance = new MyCustomError("../src/helpers/errors.json");
     customErrorInstance.addError(error);
     next(error);
   }
