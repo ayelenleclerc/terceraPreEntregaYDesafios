@@ -4,12 +4,15 @@ import {
   productsService,
   ticketsService,
 } from "../services/index.js";
+import MailerService from "../services/MailerService.js";
+import DMailTemplates from "../constants//DMailTemplates.js";
 
 const getCarts = async (req, res, next) => {
   try {
     const carts = await cartsService.getCarts();
     return res.send({ status: "success", payload: carts });
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -24,14 +27,17 @@ const getCartById = async (req, res, next) => {
         .send({ status: "error", message: "Cart not found" });
     return res.send({ status: "success", payload: cart });
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
 const createCart = async (req, res, next) => {
   try {
     const result = await cartsService.createCart(cart);
+    req.logger.info("Cart created successfully", result._id);
     return res.send({ status: "success", payload: result._id });
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -65,6 +71,7 @@ const deleteProduct = async (req, res, next) => {
       return "Cart Not Found";
     }
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -108,6 +115,7 @@ const addProduct = async (req, res, next) => {
       return res.send({ status: "error", message: "Cart not found" });
     }
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -146,6 +154,7 @@ const updateProduct = async (req, res, next) => {
       return res.send({ status: "error", message: "Cart not found" });
     }
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -166,6 +175,7 @@ const deleteTotalProduct = async (req, res, next) => {
       return res.send({ status: "error", message: "Cart not found" });
     }
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -188,6 +198,7 @@ const updateCart = async (req, res, next) => {
       message: "Cart updated successfully",
     });
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -205,6 +216,7 @@ const deleteCart = async (req, res, next) => {
       message: "Cart deleted successfully",
     });
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -246,7 +258,7 @@ const purchaseCart = async (req, res, next) => {
         productPurchase.push(item);
       }
     } catch (error) {
-      console.error("An error occurred:", error);
+      req.logger.error("An error occurred:", error);
       return res.status(500).send({
         status: "error",
         message: "An error occurred while processing the purchase",
@@ -278,19 +290,35 @@ const purchaseCart = async (req, res, next) => {
         );
       }
     } catch (error) {
-      console.error("An error occurred:", error);
+      req.logger.error("An error occurred:", error);
       return res.status(500).send({
         status: "error",
         message: "An error occurred while processing the purchase",
       });
     }
-
+    try {
+      const mailerService = new MailerService();
+      const result = await mailerService.sendMail(
+        [req.user.email],
+        DMailTemplates.PURCHASE,
+        {
+          user: req.user,
+        }
+      );
+    } catch (error) {
+      req.logger.error(
+        `Falló el envío de correo para ${req.user.email}`,
+        error
+      );
+    }
+    req.logger.info("Cart purchased successfully");
     return res.send({
       status: "success",
       message: "Cart purchased successfully",
       payload: newTicket,
     });
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };

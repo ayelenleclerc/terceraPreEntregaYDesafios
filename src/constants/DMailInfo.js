@@ -21,4 +21,14 @@ export default {
       },
     ],
   },
+  purchase: {
+    subject: "Gracias por tu compra",
+    attachments: [
+      {
+        filename: "logo.png",
+        path: `${__dirname}/public/img/logo.png`,
+        cid: "logo",
+      },
+    ],
+  },
 };

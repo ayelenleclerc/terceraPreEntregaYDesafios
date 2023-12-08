@@ -16,6 +16,7 @@ const home = async (req, res, next) => {
   try {
     return res.render("home");
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -23,6 +24,7 @@ const register = async (req, res, next) => {
   try {
     return res.render("register");
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -31,6 +33,7 @@ const login = async (req, res, next) => {
   try {
     return res.render("login");
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -39,6 +42,7 @@ const profile = async (req, res, next) => {
   try {
     return res.render("profile");
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -68,6 +72,7 @@ const products = async (req, res, next) => {
       page: pagination.page,
     });
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -76,6 +81,7 @@ const chat = async (req, res, next) => {
   try {
     return res.render("chat");
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -85,6 +91,7 @@ const realTimeProducts = async (req, res, next) => {
     const listaProductos = await productsService.getProducts();
     return res.render("realTimeProducts", { listaProductos });
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -94,6 +101,7 @@ const cart = async (req, res, next) => {
     const cart = await cartsService.getCartById(req.user._id);
     return res.render("cart", { cart });
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -101,8 +109,10 @@ const cart = async (req, res, next) => {
 const purchase = async (req, res, next) => {
   try {
     const ticket = await ticketsService.getTicketsBy(req.user.cart._id);
+
     return res.render("purchase", { ticket });
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -131,10 +141,11 @@ const restorePassword = async (req, res, next) => {
       await usersService.updateUser(user._id, { password: hashNewPassword });
       res.sendSuccess();
     } catch (error) {
-      console.log(error);
+      req.logger.error(error);
       res.sendBadRequest("Invalid token");
     }
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -148,22 +159,26 @@ const passwordRestore = async (req, res, next) => {
       });
     try {
       jwt.verify(token, config.jwt.SECRET);
+      req.logger.info("Link valid to restore password");
       return res.render("passwordRestore", { token });
     } catch (error) {
-      console.log(error);
+      req.logger.error(error);
       console.log(Object.keys(error));
       if (error.expiredAt) {
+        req.logger.warning("Link expired", error.expiredAt);
         return res.render("RestorePasswordError", {
           error:
             "Link expirado, por favor solicita un nuevo link de restablecimiento",
         });
       }
+      req.logger.warning("Trying to restore password with invalid Link");
       return res.render("RestorePasswordError", {
         error:
           "Link inválido o corrupto. Por favor solicita un nuevo link de restablecimiento",
       });
     }
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };

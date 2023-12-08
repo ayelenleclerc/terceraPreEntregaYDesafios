@@ -19,11 +19,16 @@ const register = async (req, res, next) => {
         }
       );
     } catch (error) {
-      console.log(`Falló el envío de correo para ${req.user.email}`, error);
+      req.logger.error(
+        `Falló el envío de correo para ${req.user.email}`,
+        error
+      );
     }
     res.clearCookie("cart");
+    req.logger.info("Registered", req.user);
     return res.sendSuccess("Registered");
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -36,8 +41,11 @@ const login = async (req, res, next) => {
     });
     res.cookie(config.jwt.COOKIE, token);
     res.clearCookie("cart");
+
+    req.logger.info("Logged In", req.user);
     return res.sendSuccess("Logged In");
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -45,8 +53,10 @@ const login = async (req, res, next) => {
 const logout = async (req, res, next) => {
   try {
     res.clearCookie(config.jwt.COOKIE);
+    req.logger.info("Logged Out", req.user);
     return res.sendSuccess("Logged Out");
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -55,6 +65,7 @@ const current = async (req, res, next) => {
   try {
     return res.sendSuccessWithPayload(req.user);
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -84,11 +95,16 @@ const githubcallback = async (req, res, next) => {
           user: req.user,
         }
       );
+      req.logger.info("User Registered or logged in by Github", req.user);
     } catch (error) {
-      console.log(`Falló el envío de correo para ${req.user.email}`, error);
+      req.logger.error(
+        `Falló el envío de correo para ${req.user.email}`,
+        error
+      );
     }
     return res.redirect("/profile");
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -116,11 +132,16 @@ const googlecallback = async (req, res, next) => {
           user: req.user,
         }
       );
+      req.logger.info("User Registered or logged in by Google", req.user);
     } catch (error) {
-      console.log(`Falló el envío de correo para ${req.user.email}`, error);
+      req.logger.error(
+        `Falló el envío de correo para ${req.user.email}`,
+        error
+      );
     }
     return res.redirect("/profile");
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -139,8 +160,10 @@ const passwordRestoreRequest = async (req, res, next) => {
       DMailTemplates.RESTORE_PWD,
       { token }
     );
+    req.logger.info("Password Restore Request, sent to", { email, token });
     res.sendSuccess("Email sent");
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
@@ -154,25 +177,38 @@ const passwordRestore = async (req, res, next) => {
       const { email } = jwt.verify(token, config.jwt.SECRET);
       //El usuario sí está en la base?
       const user = await usersService.getUserBy({ email });
-      if (!user) return res.sendBadRequest("User doesn't exist");
+      if (!user) {
+        req.logger.error("User doesn't exist with credentials:", {
+          email,
+          token,
+        });
+        return res.sendBadRequest("User doesn't exist");
+      }
       //¿No será la misma contraseña que ya tiene?
       const isSamePassword = await authService.validatePassword(
         newPassword,
         user.password
       );
-      if (isSamePassword)
+      if (isSamePassword) {
+        req.logger.error("New Password Cannot be equal to Old Password", {
+          email,
+          token,
+        });
         return res.sendBadRequest(
           "New Password Cannot be equal to Old Password"
         );
-      //Hashear mi nuevo password
+      }
+
       const hashNewPassword = await authService.createHash(newPassword);
       await usersService.updateUser(user._id, { password: hashNewPassword });
+      req.logger.info("Password Restore Successful", { email, token });
       res.sendSuccess();
     } catch (error) {
-      console.log(error);
+      req.logger.error(error);
       res.sendBadRequest("Invalid token");
     }
   } catch (error) {
+    req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
