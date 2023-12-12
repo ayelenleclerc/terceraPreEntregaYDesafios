@@ -34,6 +34,14 @@ const schema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    documents: {
+      type: Array,
+      default: [{ name: "", reference: "" }],
+    },
+    last_connection: {
+      type: Date,
+      default: new Date().toISOString(),
+    },
   },
   {
     timestamps: true,

@@ -1,5 +1,5 @@
 import { generateProducts } from "../mocks/products.js";
-import { productsService } from "../services/index.js";
+import { productsService, usersService } from "../services/index.js";
 import myErrorHandler from "../helpers/myErrorHandler.js";
 
 const paginateProducts = async (req, res, next) => {
@@ -35,7 +35,34 @@ const getProductsBy = async (req, res, next) => {
 
 const createProduct = async (req, res, next) => {
   try {
-    const product = await productsService.createProduct(req.body);
+    const { title, description, code, price, stock, category, thumbnails } =
+      req.body;
+    if (!title || !description || !code || !price || !stock || !category) {
+      req.logger.warning("Incomplete data");
+      return res
+        .status(400)
+        .json({ message: "Error! product not created", product });
+    }
+    const newProduct = {
+      title,
+      description,
+      code,
+      price,
+      stock,
+      category,
+      thumbnails,
+    };
+    if (req.user.role === "premium") {
+      const user = await usersService.getUserBy({ _id: req.user.id });
+      if (!user)
+        return res
+          .status(404)
+          .send({ status: "error", message: "User not found" });
+      newProduct.owner = user.email;
+    } else {
+      newProduct.owner = "admin";
+    }
+    const product = await productsService.createProduct(newProduct);
     if (product === "The insert code already exists") {
       req.logger.warning("The insert code already exists");
       return res

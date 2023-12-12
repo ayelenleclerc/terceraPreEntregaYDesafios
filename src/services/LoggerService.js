@@ -1,4 +1,5 @@
 import winston from "winston";
+import config from "../config/config.js";
 
 export default class LoggerService {
   constructor(env) {
@@ -14,14 +15,17 @@ export default class LoggerService {
   }
 
   createLogger = (env) => {
-    switch (env) {
+    switch (config.app.LOGGER_ENV) {
       case "development":
         return winston.createLogger({
           levels: this.winston_levels,
           transports: [
-            new winston.transports.Console({ level: "debug" }),
+            new winston.transports.Console({
+              level: "debug",
+              format: winston.format.simple(),
+            }),
             new winston.transports.File({
-              filename: "./errors-dev.log",
+              filename: "./errorsDev.log",
               level: "error",
             }),
           ],
@@ -33,8 +37,8 @@ export default class LoggerService {
           transports: [
             new winston.transports.Console({ level: "info" }),
             new winston.transports.File({
+              level: "warning",
               filename: "./errors.log",
-              level: "error",
             }),
           ],
         });

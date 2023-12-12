@@ -183,6 +183,24 @@ const passwordRestore = async (req, res, next) => {
   }
 };
 
+const premium = async (req, res, next) => {
+  try {
+    return res.render("premium");
+  } catch (error) {
+    req.logger.error(error);
+    myErrorHandler(error, next);
+  }
+};
+
+const productCreator = async (req, res, next) => {
+  try {
+    return res.render("productCreator");
+  } catch (error) {
+    req.logger.error(error);
+    myErrorHandler(error, next);
+  }
+};
+
 export default {
   home,
   register,
@@ -195,4 +213,6 @@ export default {
   purchase,
   passwordRestore,
   restorePassword,
+  premium,
+  productCreator,
 };

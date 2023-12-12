@@ -45,7 +45,7 @@
   "scripts": {
     "dev": "nodemon src/app.js ",
     "start": "node src/app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha test/Users/dao/Users.test.js"
   },
   "type": "module",
   "version": "1.0.0",

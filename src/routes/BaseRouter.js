@@ -2,6 +2,7 @@ import { Router } from "express";
 import passportCall from "../middlewares/passportCall.js";
 import executePolicies from "../middlewares/executePolicies.js";
 import cartSetter from "../middlewares/cartSetter.js";
+import attachLogger from "../middlewares/attachLogger.js";
 
 export default class BaseRouter {
   constructor() {
@@ -18,6 +19,7 @@ export default class BaseRouter {
   get(path, policies, ...callbacks) {
     this.router.get(
       path,
+      attachLogger,
       this.generateCustomResponses,
       passportCall("jwt", { strategyType: "JWT" }),
       cartSetter,
@@ -28,6 +30,7 @@ export default class BaseRouter {
   post(path, policies, ...callbacks) {
     this.router.post(
       path,
+      attachLogger,
       this.generateCustomResponses,
       passportCall("jwt", { strategyType: "JWT" }),
       cartSetter,
@@ -38,6 +41,7 @@ export default class BaseRouter {
   put(path, policies, ...callbacks) {
     this.router.put(
       path,
+      attachLogger,
       this.generateCustomResponses,
       passportCall("jwt", { strategyType: "JWT" }),
       cartSetter,
@@ -48,6 +52,7 @@ export default class BaseRouter {
   delete(path, policies, ...callbacks) {
     this.router.delete(
       path,
+      attachLogger,
       this.generateCustomResponses,
       passportCall("jwt", { strategyType: "JWT" }),
       cartSetter,

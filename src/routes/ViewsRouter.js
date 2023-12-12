@@ -25,6 +25,14 @@ class ViewsRouter extends BaseRouter {
     this.get("/purchase", ["AUTH"], viewsController.purchase);
 
     this.get("/password-restore", ["PUBLIC"], viewsController.passwordRestore);
+
+    this.get("/premium", ["USER"], viewsController.premium);
+
+    this.get(
+      "/productCreator",
+      ["ADMIN", "PREMIUM"],
+      viewsController.productCreator
+    );
   }
 }
 

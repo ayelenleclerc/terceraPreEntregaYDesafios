@@ -11,12 +11,12 @@ import cartsRouter from "./routes/CartRouter.js";
 import viewsRouter from "./routes/ViewsRouter.js";
 import SessionsRouter from "./routes/SessionsRouter.js";
 import chatRouter from "./routes/ChatRoutes.js";
+import UsersRouter from "./routes/UsersRouter.js";
 
 import __dirname from "./utils.js";
 import config from "./config/config.js";
 import initializePassportStrategies from "./config/passport.config.js";
 import registerChatHandler from "./listeners/chat.listener.js";
-import attachLogger from "./middlewares/attachLogger.js";
 
 const app = express();
 
@@ -51,7 +51,6 @@ app.use(express.static(`${__dirname}/public`));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(attachLogger);
 
 initializePassportStrategies();
 
@@ -61,8 +60,9 @@ app.use("/api/products", productsRouter);
 app.use("/api/carts", cartsRouter);
 app.use("/api/sessions", SessionsRouter);
 app.use("/api/chat", chatRouter);
+app.use("/api/users", UsersRouter);
 
-app.use("/loggerTest", attachLogger, async (req, res) => {
+app.use("/loggerTest", async (req, res) => {
   req.logger.log("fatal", "Logger test fatal");
   req.logger.log("error", "Logger test error");
   req.logger.log("warning", "Logger test warning");

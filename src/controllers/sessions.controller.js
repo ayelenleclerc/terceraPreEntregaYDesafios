@@ -6,6 +6,7 @@ import DMailTemplates from "../constants//DMailTemplates.js";
 import { usersService } from "../services/index.js";
 import authService from "../services/authService.js";
 import myErrorHandler from "../helpers/myErrorHandler.js";
+import { updateLastConnection } from "../helpers/lastConnection.js";
 
 const register = async (req, res, next) => {
   try {
@@ -41,7 +42,7 @@ const login = async (req, res, next) => {
     });
     res.cookie(config.jwt.COOKIE, token);
     res.clearCookie("cart");
-
+    updateLastConnection(req.user._id);
     req.logger.info("Logged In", req.user);
     return res.sendSuccess("Logged In");
   } catch (error) {
@@ -54,6 +55,7 @@ const logout = async (req, res, next) => {
   try {
     res.clearCookie(config.jwt.COOKIE);
     req.logger.info("Logged Out", req.user);
+    updateLastConnection(req.user._id);
     return res.sendSuccess("Logged Out");
   } catch (error) {
     req.logger.error(error);
@@ -95,6 +97,7 @@ const githubcallback = async (req, res, next) => {
           user: req.user,
         }
       );
+
       req.logger.info("User Registered or logged in by Github", req.user);
     } catch (error) {
       req.logger.error(
@@ -102,6 +105,8 @@ const githubcallback = async (req, res, next) => {
         error
       );
     }
+    updateLastConnection(req.user._id);
+    req.logger.info("Logged In", req.user);
     return res.redirect("/profile");
   } catch (error) {
     req.logger.error(error);
@@ -139,6 +144,8 @@ const googlecallback = async (req, res, next) => {
         error
       );
     }
+    updateLastConnection(req.user._id);
+    req.logger.info("Logged In", req.user);
     return res.redirect("/profile");
   } catch (error) {
     req.logger.error(error);
