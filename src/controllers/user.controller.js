@@ -1,6 +1,7 @@
 import { usersService } from "../services/index.js";
 import myErrorHandler from "../helpers/myErrorHandler.js";
 import UserDto from "../dto/userDto.js";
+import uploader from "../services/uploadService.js";
 
 const getUsers = async (req, res, next) => {
   try {
@@ -73,41 +74,45 @@ const deleteUser = async (req, res, next) => {
 
 const upgradeUser = async (req, res, next) => {
   try {
-    const user = await usersService.getUserBy({ _id: req.user.id });
-    if (!user)
+    const { id: uid } = req.user;
+    const user = await usersService.getUserBy({ _id: uid });
+
+    if (!user) {
       return res
         .status(404)
         .send({ status: "error", message: "User not found" });
-    if (user.role === "premium")
+    }
+
+    if (user.role === "premium") {
       return res
         .status(400)
         .send({ status: "error", message: "User already upgraded" });
-    if (user.documents.length === 0)
-      return res.status(400).send({
-        status: "error",
-        message: "User must upload documents",
-        payload:
-          "Debe cargar todos los documentos solicitados para poder gestionar la suscripción",
-      });
-    if (req.user.documents.length >= 5) {
-      await usersService.updateUser(user.id, { role: "premium" });
-      const tokenizedUser = UserDto.getTokenDTOFromToken({
-        ...user,
-        role: "premium",
-      });
+    }
+
+    if (user.role === "user") {
+      const updatedUser = await usersService.updateUser(
+        { _id: uid },
+        { role: "premium" }
+      );
+
+      const tokenizedUser = UserDto.getTokenDTOFrom(updatedUser);
       const token = jwt.sign(tokenizedUser, config.jwt.SECRET, {
         expiresIn: "1d",
       });
+
       res.cookie(config.jwt.COOKIE, token);
-      req.logger.info("User upgraded", user.id);
-      return res.redirect("/profile");
+
+      req.logger.info("User upgraded", uid);
+      return res
+        .status(200)
+        .send({ status: "success", message: "User upgraded successfully" });
     }
   } catch (error) {
+    console.error("Error in upgradeUser:", error);
     req.logger.error(error);
     myErrorHandler(error, next);
   }
 };
-
 const uploadDocuments = async (req, res, next) => {
   try {
     // Acceder a los archivos cargados
@@ -135,10 +140,9 @@ const uploadDocuments = async (req, res, next) => {
     return res.sendSuccess({
       status: "success",
       message: "Documents uploaded successfully",
-      payload: documents,
     });
   } catch (error) {
-    upload(req, res, function (err) {
+    uploader(req, res, function (err) {
       if (err instanceof multer.MulterError) {
         req.logger.error(error);
         myErrorHandler(error, next);

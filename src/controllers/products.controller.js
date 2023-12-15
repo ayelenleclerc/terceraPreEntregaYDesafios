@@ -39,10 +39,9 @@ const createProduct = async (req, res, next) => {
       req.body;
     if (!title || !description || !code || !price || !stock || !category) {
       req.logger.warning("Incomplete data");
-      return res
-        .status(400)
-        .json({ message: "Error! product not created", product });
+      return res.status(400).json({ message: "Error! product not created" });
     }
+
     const newProduct = {
       title,
       description,
@@ -52,27 +51,27 @@ const createProduct = async (req, res, next) => {
       category,
       thumbnails,
     };
+
     if (req.user.role === "premium") {
       const user = await usersService.getUserBy({ _id: req.user.id });
-      if (!user)
+      if (!user) {
         return res
           .status(404)
           .send({ status: "error", message: "User not found" });
-      newProduct.owner = user.email;
+      }
+      newProduct.owner = user._id;
     } else {
-      newProduct.owner = "admin";
+      newProduct.owner = null;
     }
+
     const product = await productsService.createProduct(newProduct);
+
     if (product === "The insert code already exists") {
       req.logger.warning("The insert code already exists");
-      return res
-        .status(400)
-        .json({ message: "Error! product not created", product });
+      return res.status(400).json({ message: "Error! product not created" });
     } else if (product === "Complete all fields") {
       req.logger.warning("Incomplete data");
-      return res
-        .status(400)
-        .json({ message: "Error! product not created", product });
+      return res.status(400).json({ message: "Error! product not created" });
     } else {
       req.logger.info("Product created");
       return res.status(201).json({ message: "Product created", product });
@@ -127,7 +126,7 @@ const mockingProducts = async (req, res, next) => {
       const mockProduct = generateProducts();
       products.push(mockProduct);
     }
-    req.looger.info("Mock Products created");
+    req.logger.info("Mock Products created");
     return res.send({ status: "success", payload: products });
   } catch (error) {
     req.logger.error(error);

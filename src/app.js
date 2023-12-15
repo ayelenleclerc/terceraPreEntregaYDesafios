@@ -11,7 +11,7 @@ import cartsRouter from "./routes/CartRouter.js";
 import viewsRouter from "./routes/ViewsRouter.js";
 import SessionsRouter from "./routes/SessionsRouter.js";
 import chatRouter from "./routes/ChatRoutes.js";
-import UsersRouter from "./routes/UsersRouter.js";
+import usersRouter from "./routes/UsersRouter.js";
 
 import __dirname from "./utils.js";
 import config from "./config/config.js";
@@ -60,7 +60,7 @@ app.use("/api/products", productsRouter);
 app.use("/api/carts", cartsRouter);
 app.use("/api/sessions", SessionsRouter);
 app.use("/api/chat", chatRouter);
-app.use("/api/users", UsersRouter);
+app.use("/api/users", usersRouter);
 
 app.use("/loggerTest", async (req, res) => {
   req.logger.log("fatal", "Logger test fatal");

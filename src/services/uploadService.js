@@ -14,6 +14,8 @@ const storage = multer.diskStorage({
       file.fieldname === "bankStatement"
     ) {
       return callback(null, `${__dirname}/public/documents`);
+    } else if (file.fieldname === "product") {
+      return callback(null, `${__dirname}/public/products`);
     } else {
       return callback(null, `${__dirname}/public/others`);
     }

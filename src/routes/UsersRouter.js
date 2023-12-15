@@ -7,7 +7,7 @@ class UsersRouter extends BaseRouter {
     this.get("/", ["ADMIN"], userController.getUsers);
     this.get("/:uid", ["NO_AUTH"], userController.getUserBy);
     this.post("/", ["PUBLIC"], userController.createUser);
-    this.put("/:uid", ["USER"], userController.updateUser);
+    this.put("/:user", ["USER"], userController.updateUser);
     this.post(
       "/:uid/documents",
       ["USER"],
@@ -20,7 +20,12 @@ class UsersRouter extends BaseRouter {
       ]),
       userController.uploadDocuments
     );
-    this.put("premium/:uid", ["USER"], userController.upgradeUser);
+    this.put(
+      "/premium/:uid",
+      ["USER", "PREMIUM", "ADMIN"],
+      userController.upgradeUser
+    );
+
     this.delete("/:uid", ["ADMIN"], userController.deleteUser);
   }
 }

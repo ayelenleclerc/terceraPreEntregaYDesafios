@@ -90,29 +90,34 @@ const addProduct = async (req, res, next) => {
     }
     const quantityAdd = quantity ? quantity : 1;
 
-    if (cart) {
-      if (product) {
-        let arrayProducts = await cart.products;
-        let positionProduct = arrayProducts.findIndex(
-          (product) => product.product._id == pid
-        );
-
-        if (positionProduct != -1) {
-          arrayProducts[await positionProduct].quantity =
-            arrayProducts[positionProduct].quantity + quantityAdd;
-        } else {
-          arrayProducts.push({ product: pid, quantity: quantityAdd });
-        }
-        await cartsService.updateCart(
-          { _id: cart._id },
-          { products: arrayProducts }
-        );
-        return res.send({ status: "success", message: "Added successfully" });
-      } else {
-        return res.send({ status: "error", message: "Product not found" });
+    if (cart && product) {
+      if (req.user.role === "PREMIUM" && product.owner === req.user.id) {
+        return res
+          .status(403)
+          .send({ status: "error", message: "Cannot add own product to cart" });
       }
+
+      let arrayProducts = await cart.products;
+      let positionProduct = arrayProducts.findIndex(
+        (product) => product.product._id == pid
+      );
+
+      if (positionProduct != -1) {
+        arrayProducts[positionProduct].quantity =
+          arrayProducts[positionProduct].quantity + quantityAdd;
+      } else {
+        arrayProducts.push({ product: pid, quantity: quantityAdd });
+      }
+
+      await cartsService.updateCart(
+        { _id: cart._id },
+        { products: arrayProducts }
+      );
+      return res.send({ status: "success", message: "Added successfully" });
     } else {
-      return res.send({ status: "error", message: "Cart not found" });
+      return res
+        .status(404)
+        .send({ status: "error", message: "Product or Cart not found" });
     }
   } catch (error) {
     req.logger.error(error);
@@ -235,6 +240,19 @@ const purchaseCart = async (req, res, next) => {
           status: "error",
           message: "Cart not found",
         });
+      }
+
+      if (req.user.role === "PREMIUM") {
+        const userProducts = cart.products.filter(
+          (item) => item.product.owner === req.user.id
+        );
+
+        if (userProducts.length > 0) {
+          return res.status(403).send({
+            status: "error",
+            message: "Cannot purchase own products",
+          });
+        }
       }
 
       for (const item of cart.products) {
