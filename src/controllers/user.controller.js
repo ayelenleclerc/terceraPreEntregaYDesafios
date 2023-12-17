@@ -6,7 +6,17 @@ import uploader from "../services/uploadService.js";
 const getUsers = async (req, res, next) => {
   try {
     const users = await usersService.getUsers();
-    return res.send({ status: "success", payload: users });
+    const usersInfo = users.map((user) => {
+      return {
+        id: user._id,
+        name: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        role: user.role,
+      };
+    });
+
+    req.logger.info("Users retrieved successfully", usersInfo);
+    return res.send({ status: "success", payload: usersInfo });
   } catch (error) {
     req.logger.error(error);
     myErrorHandler(error, next);

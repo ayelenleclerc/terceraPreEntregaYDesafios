@@ -3,13 +3,31 @@
   <div style="text-align:center">
     <img src="cid:logo" />
   </div>
-  <div>
-    <h4>Compra finalizada</h4>
-    <p>
-      Gracias por realizar su compra, en breve enviaremos la factura de compra y
-      fecha de entrega.</p>
-
-  </div>
+  <h1>Detalle de Compra</h1>
+  <p>Hola {{name}},</p>
+  <p>Gracias por tu compra. Aquí está el detalle:</p>
+  <br />
+  <p> El numero de ticket es: {{ticket}}</p>
+  <p> La fecha de compra: {{date}}</p>
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Productos</th>
+        <th scope="col">Cantidad</th>
+        <th scope="col">Precio</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each products}}
+        <tr>
+          <td>{{product.title}}</td>
+          <td>{{quantity}}</td>
+          <td>{{product.price}}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  <p>Total: {{total}}</p>
 
   <p>Saludos cordiales</p>
   <p>Distribuidora Bescos</p>

@@ -17,6 +17,9 @@ const renderUserView = (payload) => {
         `;
       } else {
         content = `
+          <h4 class="profileName">Hola ${payload.name}</h4>
+          <p class="profileEmail">Email: ${payload.email}</p>
+          <p class="profileRole">Rol: ${payload.role}</p>
           <p> Ya cumples con los requisitos para ser premium</p>
           <button class="btn btn-success" onclick="updateUserPremiumStatus('${payload.id}')">Ser premium</button>
         `;
@@ -25,15 +28,22 @@ const renderUserView = (payload) => {
 
     case "premium":
       content = `
-        <p> ¿Deseas vender un producto?</p>
-        <button class="btn btn-success" onclick="productCreator()">Sí</button>
+          <h4 class="profileName">Hola ${payload.name}</h4>
+          <p class="profileEmail">Email: ${payload.email}</p>
+          <p class="profileRole">Rol: ${payload.role}</p>
+         <p> ¿Deseas vender un producto?</p>
+         <button class="btn btn-success" onclick="productCreator()">Sí</button>
       `;
       break;
 
     case "admin":
       content = `
+        <h4 class="profileName">Hola</h4>
+        <p class="profileRole">Rol: ${payload.role}</p>
         <p> Ir al panel de administración de productos</p>
         <button class="btn btn-success" onclick="productCreator()">Sí</button>
+        <p> Ir al panel de administración de Usuarios</p>
+        <a href="/api/users" class="btn btn-success">Sí</a>
       `;
       break;
 
@@ -42,9 +52,6 @@ const renderUserView = (payload) => {
   }
 
   profile.innerHTML = `
-    <h4 class="profileName">Hola ${payload.name}</h4>
-    <p class="profileEmail">Email: ${payload.email}</p>
-    <p class="profileRole">Rol: ${payload.role}</p>
     <div>${content}</div>
   `;
 };

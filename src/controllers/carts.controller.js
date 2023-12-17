@@ -316,11 +316,19 @@ const purchaseCart = async (req, res, next) => {
     }
     try {
       const mailerService = new MailerService();
+      const payload = {
+        nombreUsuario: req.user.name,
+        productos: productPurchase,
+      };
       const result = await mailerService.sendMail(
         [req.user.email],
         DMailTemplates.PURCHASE,
         {
-          user: req.user,
+          name: req.user.name,
+          ticket: newTicket.code,
+          products: newTicket.products,
+          total: newTicket.amount,
+          date: newTicket.purchase_datetime,
         }
       );
     } catch (error) {

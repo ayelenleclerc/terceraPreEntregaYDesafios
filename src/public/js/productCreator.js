@@ -24,16 +24,13 @@ form.addEventListener("submit", async (event) => {
     productData[key] = value;
   });
 
-  // Agregar lógica del campo 'owner' según el rol del usuario
   try {
     const responseUser = await fetch("/api/sessions/current");
     const userData = await responseUser.json();
 
     if (userData.role === "PREMIUM") {
-      // Si el usuario es premium, establecer 'owner' como su correo electrónico
       productData.owner = userData.email;
     } else {
-      // Si no es premium, establecer 'owner' como "admin"
       productData.owner = "admin";
     }
 
